@@ -1,12 +1,10 @@
 import discord
 from discord.ext import commands
 import asyncio
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 intents = discord.Intents.default()
+intents.message_content = True
+intents.guilds = True
 intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -18,7 +16,7 @@ async def on_ready():
 
     try:
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} Commands")
+        print(f"Synced {len(synced)} slash commands")
     except Exception as e:
         print(e)
 
@@ -26,7 +24,7 @@ async def on_ready():
 async def main():
     async with bot:
         await bot.load_extension("cogs.radio")
-        await bot.start(os.getenv("TOKEN"))
+        await bot.start("DEIN_TOKEN")
 
 
 asyncio.run(main())

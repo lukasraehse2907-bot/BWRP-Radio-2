@@ -10,63 +10,57 @@ class Radio(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="join")
-async def join(self, interaction: discord.Interaction):
+    @app_commands.command(name="join", description="Bot joint deinen Voice Channel")
+    async def join(self, interaction: discord.Interaction):
 
-    if not interaction.user.voice or not interaction.user.voice.channel:
-        await interaction.response.send_message("❌ Geh erst in einen Voice Channel", ephemeral=True)
-        return
-
-    channel = interaction.user.voice.channel
-    voice = interaction.guild.voice_client
-
-    if voice:
-        await voice.move_to(channel)
-    else:
-        await channel.connect()
-
-    await interaction.response.send_message("✅ Ich bin jetzt im Voice Channel", ephemeral=True)
-
-    @app_commands.command(name="play", description="Start radio stream")
-    async def play(self, interaction: discord.Interaction):
         if not interaction.user.voice:
-            await interaction.response.send_message("❌ You must be in a voice channel")
+            await interaction.response.send_message("❌ Du bist in keinem Voice Channel!")
             return
 
-        voice = interaction.guild.voice_client
+        channel = interaction.user.voice.channel
 
-        if not voice:
-            channel = interaction.user.voice.channel
-            voice = await channel.connect()
+        # Falls schon verbunden → erst disconnect
+        if interaction.guild.voice_client:
+            await interaction.guild.voice_client.disconnect()
 
-        if voice.is_playing():
-            voice.stop()
+        await channel.connect()
 
-        source = discord.FFmpegPCMAudio(RADIO_URL)
-        voice.play(source)
+        await interaction.response.send_message("✅ Ich bin im Voice Channel!")
 
-        await interaction.response.send_message("📻 Radio started!")
-
-    @app_commands.command(name="stop", description="Stop radio")
-    async def stop(self, interaction: discord.Interaction):
-        voice = interaction.guild.voice_client
-
-        if voice and voice.is_playing():
-            voice.stop()
-            await interaction.response.send_message("⏹️ Stopped radio")
-        else:
-            await interaction.response.send_message("❌ Nothing is playing")
-
-    @app_commands.command(name="leave", description="Bot leaves voice channel")
+    @app_commands.command(name="leave", description="Bot verlässt Voice Channel")
     async def leave(self, interaction: discord.Interaction):
-        voice = interaction.guild.voice_client
 
-        if voice:
-            await voice.disconnect()
-            await interaction.response.send_message("👋 Left voice channel")
-        else:
-            await interaction.response.send_message("❌ I'm not in a voice channel")
+        vc = interaction.guild.voice_client
 
+        if not vc:
+            await interaction.response.send_message("❌ Ich bin in keinem Voice Channel!")
+            return
+
+        await vc.disconnect()
+        await interaction.response.send_message("👋 Ich habe den Channel verlassen!")
+
+    @app_commands.command(name="radio", description="Startet I Love Radio Stream")
+    async def radio(self, interaction: discord.Interaction):
+
+        vc = interaction.guild.voice_client
+
+        if not vc:
+            await interaction.response.send_message("❌ Ich bin nicht im Voice Channel!")
+            return
+
+        if vc.is_playing():
+            vc.stop()
+
+        # STREAM START
+        source = discord.FFmpegPCMAudio(
+            RADIO_URL,
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            options="-vn"
+        )
+
+        vc.play(source)
+
+        await interaction.response.send_message("🎶 I Love Radio läuft jetzt!")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Radio(bot))
