@@ -1,52 +1,18 @@
-from discord.ext import commands
 import discord
-from discord.commands import slash_command
-
-intents = discord.Intents.default()
-intents.message_content = True
-
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user}")
-
-bot.run("TOKEN")
+from discord.ext import commands
+from discord import app_commands
 
 
-class Radio(commands.Cog):
-    def __init__(self, bot):
+class Base(commands.Cog):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @slash_command(description="Starte das Radio")
-    async def play(self, ctx):
-        if ctx.author.voice is None:
-            return await ctx.respond("Du musst erst einem Voice Channel beitreten.")
-
-        if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-            return await ctx.respond("Ich habe keine Rechte, um deinem Channel beizutreten.")
-
-        if ctx.voice_client is None:
-            await ctx.author.voice.channel.connect()  # Bot ist in keinem Voice Channel
-        else:
-            await ctx.voice_client.move_to(ctx.author.voice.channel)  # Bot ist schon in einem anderen Voice Channel
-
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-
-        ctx.voice_client.play(
-            discord.FFmpegPCMAudio("https://streams.ilovemusic.de/iloveradio1.mp3")
+    @app_commands.command(name="hello", description="hello")
+    async def hello(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            f"Hey {interaction.user.mention}"
         )
-        await ctx.respond("Das Radio wurde gestartet")
-
-    @slash_command(description="Stoppe das Radio")
-    async def leave(self, ctx):
-        if ctx.voice_client is None:
-            return await ctx.respond("Ich bin mit keinem Voice Channel verbunden.")
-
-        await ctx.voice_client.disconnect()
-        await ctx.respond("Bis bald")
 
 
-def setup(bot):
-    bot.add_cog(Radio(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Base(bot))
