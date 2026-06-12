@@ -1,5 +1,6 @@
-import discord
 from discord.ext import commands
+import discord
+from discord.commands import slash_command
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -10,8 +11,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"Logged in as {bot.user}")
 
-bot.run("DEIN_TOKEN")
-from discord.commands import slash_command
+bot.run("TOKEN")
 
 
 class Radio(commands.Cog):
