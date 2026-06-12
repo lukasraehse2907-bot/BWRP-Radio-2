@@ -16,8 +16,3 @@ class Base(commands.Cog):
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Base(bot))
-    bot.tree.add_command(app_commands.Command(
-        name="hello",
-        description="Say hello",
-        callback=Base(bot).hello
-    ))
