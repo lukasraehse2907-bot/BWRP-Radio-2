@@ -9,16 +9,15 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
+GUILD_ID = 1510593847972073653 
+
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    guild = discord.Object(id=GUILD_ID)
 
-    try:
-        synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} commands")
-    except Exception as e:
-        print(e)
+    await bot.tree.sync(guild=guild)
 
+    print("Synced to guild")
 
 async def main():
     async with bot:
