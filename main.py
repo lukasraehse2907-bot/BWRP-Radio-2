@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 intents = discord.Intents.default()
+intents.voice_states = True
+
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
@@ -16,14 +18,14 @@ async def on_ready():
 
     try:
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} commands")
+        print(f"Synced {len(synced)} Commands")
     except Exception as e:
         print(e)
 
 
 async def main():
     async with bot:
-        await bot.load_extension("cogs.base")
+        await bot.load_extension("cogs.radio")
         await bot.start(os.getenv("TOKEN"))
 
 
