@@ -27,4 +27,4 @@ async def main():
         await bot.start(os.getenv("TOKEN"))
 
 
-await bot.tree.sync()
+asyncio.run(main())
