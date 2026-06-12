@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,6 +15,6 @@ async def on_ready():
 async def main():
     async with bot:
         await bot.load_extension("cogs.base")
-        await bot.start("DEIN_TOKEN")
+        await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
