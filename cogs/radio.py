@@ -10,15 +10,22 @@ class Radio(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="join", description="Bot joins your voice channel")
-    async def join(self, interaction: discord.Interaction):
-        if not interaction.user.voice:
-            await interaction.response.send_message("❌ You are not in a voice channel")
-            return
+    @app_commands.command(name="join")
+async def join(self, interaction: discord.Interaction):
 
-        channel = interaction.user.voice.channel
+    if not interaction.user.voice or not interaction.user.voice.channel:
+        await interaction.response.send_message("❌ Geh erst in einen Voice Channel", ephemeral=True)
+        return
+
+    channel = interaction.user.voice.channel
+    voice = interaction.guild.voice_client
+
+    if voice:
+        await voice.move_to(channel)
+    else:
         await channel.connect()
-        await interaction.response.send_message(f"✅ Joined {channel}")
+
+    await interaction.response.send_message("✅ Ich bin jetzt im Voice Channel", ephemeral=True)
 
     @app_commands.command(name="play", description="Start radio stream")
     async def play(self, interaction: discord.Interaction):
