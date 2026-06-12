@@ -1,21 +1,19 @@
 import discord
-import os
-from dotenv import load_dotenv
+from discord.ext import commands
+import asyncio
 
 intents = discord.Intents.default()
+intents.message_content = True
 
-bot = discord.Bot(intents=intents)
-
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"{bot.user} ist online")
+    print(f"Logged in as {bot.user}")
 
+async def main():
+    async with bot:
+        await bot.load_extension("cogs.base")
+        await bot.start("DEIN_TOKEN")
 
-if __name__ == "__main__":
-    for filename in os.listdir("cogs"):
-        if filename.endswith(".py"):
-            bot.load_extension(f"cogs.{filename[:-3]}")
-
-    load_dotenv()
-    bot.run(os.getenv("TOKEN"))
+asyncio.run(main())
