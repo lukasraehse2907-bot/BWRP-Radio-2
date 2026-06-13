@@ -10,53 +10,53 @@ class Radio(commands.Cog):
 
     @app_commands.command(
         name="play",
-        description="Startet den Radiostream"
+        description="Startet das Radio"
     )
     async def play(self, interaction: discord.Interaction):
 
-        if interaction.user.voice is None:
-            await interaction.response.send_message(
-                "❌ Du musst in einem Voice-Channel sein.",
-                ephemeral=True
+        try:
+            # Discord sofort antworten lassen
+            await interaction.response.defer()
+
+            if interaction.user.voice is None:
+                await interaction.followup.send(
+                    "❌ Du musst in einem Voice-Channel sein."
+                )
+                return
+
+            channel = interaction.user.voice.channel
+
+            if interaction.guild.voice_client is None:
+                vc = await channel.connect()
+            else:
+                vc = interaction.guild.voice_client
+
+            print("FFmpeg wird gestartet")
+
+            source = discord.FFmpegPCMAudio(
+                STREAM_URL,
+                before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+                options="-vn"
             )
-            return
 
-        await interaction.response.defer()
+            print("FFmpeg Objekt erstellt")
 
-        channel = interaction.user.voice.channel
-
-        if interaction.guild.voice_client is None:
-            vc = await channel.connect()
-        else:
-            vc = interaction.guild.voice_client
-
-        source = discord.FFmpegPCMAudio(
-            STREAM_URL,
-            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            options="-vn"
-        )
-
-        vc.stop()
-        vc.play(source)
-
-        await interaction.followup.send("▶️ Radio gestartet!")
-
-    @app_commands.command(
-        name="stop",
-        description="Stoppt das Radio"
-    )
-    async def stop(self, interaction: discord.Interaction):
-
-        vc = interaction.guild.voice_client
-
-        if vc:
             vc.stop()
-            await vc.disconnect()
-            await interaction.response.send_message("⏹️ Radio gestoppt.")
-        else:
-            await interaction.response.send_message(
-                "❌ Ich bin in keinem Voice-Channel."
+            vc.play(source)
+
+            print("Audio wird abgespielt")
+
+            await interaction.followup.send(
+                "▶️ Radio gestartet!"
             )
+
+        except Exception as e:
+            print("FEHLER:", e)
+
+            if interaction.response.is_done():
+                await interaction.followup.send(f"❌ Fehler: {e}")
+            else:
+                await interaction.response.send_message(f"❌ Fehler: {e}")
 
 async def setup(bot):
     await bot.add_cog(Radio(bot))
