@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
+import shutil
 
 
 RADIO_URL = "https://streams.ilovemusic.de/iloveradio1.mp3"
