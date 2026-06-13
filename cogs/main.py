@@ -1,7 +1,20 @@
 import os
-import discord
-from discord.ext import commands
 import asyncio
+import importlib
+import importlib.util
+
+def _load_discord_library():
+    for package in ("discord", "nextcord"):
+        if importlib.util.find_spec(package) is not None:
+            discord = importlib.import_module(package)
+            commands = importlib.import_module(f"{package}.ext.commands")
+            return discord, commands
+
+    raise ImportError(
+        "Keine kompatible Discord-Bibliothek gefunden. Installiere discord.py, py-cord oder nextcord."
+    )
+
+discord, commands = _load_discord_library()
 
 intents = discord.Intents.default()
 

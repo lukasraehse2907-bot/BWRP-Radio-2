@@ -1,6 +1,6 @@
-import discord
-from discord.ext import commands
-from discord import app_commands
+import discord  # type: ignore
+from discord.ext import commands  # type: ignore
+from discord import app_commands  # type: ignore
 
 RADIO_URL = "https://streams.ilovemusic.de/iloveradio1.mp3"
 

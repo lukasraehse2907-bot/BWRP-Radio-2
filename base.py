@@ -1,6 +1,6 @@
-import discord
-from discord.ext import commands
-from discord import app_commands
+import discord  # type: ignore[import]
+from discord import app_commands  # type: ignore[import]
+from discord.ext import commands  # type: ignore[import]
 
 class Base(commands.Cog):
     def __init__(self, bot):
