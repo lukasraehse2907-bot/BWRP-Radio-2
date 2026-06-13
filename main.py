@@ -1,20 +1,19 @@
-import os
+import discord
+from discord.ext import commands
 import asyncio
-import importlib
-import importlib.util
+import os
+import subprocess
+import shutil
 
-def _load_discord_library():
-    for package in ("discord", "nextcord"):
-        if importlib.util.find_spec(package) is not None:
-            discord = importlib.import_module(package)
-            commands = importlib.import_module(f"{package}.ext.commands")
-            return discord, commands
+# FFmpeg testen
+print("FFMPEG PATH:", shutil.which("ffmpeg"))
 
-    raise ImportError(
-        "Keine kompatible Discord-Bibliothek gefunden. Installiere discord.py, py-cord oder nextcord."
-    )
-
-discord, commands = _load_discord_library()
+try:
+    print(subprocess.check_output(
+        ["ffmpeg", "-version"]
+    ).decode())
+except Exception as e:
+    print("FFMPEG FEHLT:", e)
 
 intents = discord.Intents.default()
 
@@ -25,25 +24,17 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
-    print(f"Online als {bot.user}")
+    print(f"Eingeloggt als {bot.user}")
 
     try:
         synced = await bot.tree.sync()
-        print(f"{len(synced)} Commands synchronisiert")
+        print(f"{len(synced)} Slash Commands synchronisiert")
     except Exception as e:
-        print(e)
+        print("Sync Fehler:", e)
 
 async def main():
     async with bot:
-        await bot.load_extension("cogs.base")
         await bot.load_extension("cogs.radio")
-
-        token = os.getenv("TOKEN")
-
-        if not token:
-            print("TOKEN FEHLT!")
-            return
-
-        await bot.start(token)
+        await bot.start(os.getenv("TOKEN"))
 
 asyncio.run(main())
