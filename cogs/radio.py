@@ -1,13 +1,12 @@
-import discord
-from discord.ext import commands
-from discord.commands import slash_command
+import discord  # type: ignore[import]
+from discord.ext import commands  # type: ignore[import]
 
 
 class Radio(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @slash_command(description="Starte das Radio")
+    @commands.slash_command(description="Starte das Radio")
     async def play(self, ctx):
         if ctx.author.voice is None:
             return await ctx.respond("Du musst erst einem Voice Channel beitreten.")
@@ -28,7 +27,7 @@ class Radio(commands.Cog):
         )
         await ctx.respond("Das Radio wurde gestartet")
 
-    @slash_command(description="Stoppe das Radio")
+    @commands.slash_command(description="Stoppe das Radio")
     async def leave(self, ctx):
         if ctx.voice_client is None:
             return await ctx.respond("Ich bin mit keinem Voice Channel verbunden.")
