@@ -1,80 +1,41 @@
-import discord  # type: ignore
-from discord.ext import commands  # type: ignore
-from discord import app_commands  # type: ignore
+import discord
+from discord.ext import commands
+from discord.commands import slash_command
 
-RADIO_URL = "https://streams.ilovemusic.de/iloveradio1.mp3"
 
 class Radio(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(
-        name="join",
-        description="Joint deinem Voice Channel"
-    )
-    async def join(self, interaction: discord.Interaction):
+    @slash_command(description="Starte das Radio")
+    async def play(self, ctx):
+        if ctx.author.voice is None:
+            return await ctx.respond("Du musst erst einem Voice Channel beitreten.")
 
-        if interaction.user.voice is None:
-            await interaction.response.send_message(
-                "❌ Du bist in keinem Voice Channel!"
-            )
-            return
+        if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
+            return await ctx.respond("Ich habe keine Rechte, um deinem Channel beizutreten.")
 
-        channel = interaction.user.voice.channel
+        if ctx.voice_client is None:
+            await ctx.author.voice.channel.connect()  # Bot ist in keinem Voice Channel
+        else:
+            await ctx.voice_client.move_to(ctx.author.voice.channel)  # Bot ist schon in einem anderen Voice Channel
 
-        if interaction.guild.voice_client:
-            await interaction.response.send_message(
-                "✅ Bereits verbunden!"
-            )
-            return
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
 
-        await channel.connect()
-
-        await interaction.response.send_message(
-            f"✅ Verbunden mit {channel.name}"
+        ctx.voice_client.play(
+            discord.FFmpegPCMAudio("https://streams.ilovemusic.de/iloveradio1.mp3")
         )
+        await ctx.respond("Das Radio wurde gestartet")
 
-    @app_commands.command(
-        name="play",
-        description="Startet das Radio"
-    )
-    async def play(self, interaction: discord.Interaction):
+    @slash_command(description="Stoppe das Radio")
+    async def leave(self, ctx):
+        if ctx.voice_client is None:
+            return await ctx.respond("Ich bin mit keinem Voice Channel verbunden.")
 
-        vc = interaction.guild.voice_client
+        await ctx.voice_client.disconnect()
+        await ctx.respond("Bis bald")
 
-        if vc is None:
-            await interaction.response.send_message(
-                "❌ Nutze zuerst /join"
-            )
-            return
 
-        source = discord.FFmpegPCMAudio(RADIO_URL)
-
-        vc.play(source)
-
-        await interaction.response.send_message(
-            "📻 Radio gestartet"
-        )
-
-    @app_commands.command(
-        name="leave",
-        description="Verlässt den Voice Channel"
-    )
-    async def leave(self, interaction: discord.Interaction):
-
-        vc = interaction.guild.voice_client
-
-        if vc is None:
-            await interaction.response.send_message(
-                "❌ Nicht verbunden"
-            )
-            return
-
-        await vc.disconnect()
-
-        await interaction.response.send_message(
-            "👋 Getrennt"
-        )
-
-async def setup(bot):
-    await bot.add_cog(Radio(bot))
+def setup(bot):
+    bot.add_cog(Radio(bot))
