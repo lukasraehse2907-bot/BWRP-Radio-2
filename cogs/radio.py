@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-STREAM_URL = "https://streams.ilovemusic.de/iloveradio1.mp3"
+STREAM_URL = "https://s3.eu-central-3.ionoscloud.com/media-files-2026/SpotiDown.App%20-%20BIERBRUNNEN%20-%20TIEFBASSKOMMANDO.mp3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=EEAAAAEFUDiECSVDZolniioKpyoZH3dFQaSIXPS7_4uB-lxzygCo2BYCTjhjAAAAAAJOOGNFFSZ8FcopUrkMF7QDqDYy%2F20260614%2Feu-central-3%2Fs3%2Faws4_request&X-Amz-Date=20260614T000725Z&X-Amz-Expires=1800&X-Amz-Signature=059b4f94034a38963327f082a1306004165fc93c3eccdd7b06ef15847ec12310&X-Amz-SignedHeaders=host&x-id=GetObject"
 
 class Radio(commands.Cog):
     def __init__(self, bot):
