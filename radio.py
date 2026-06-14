@@ -10,15 +10,15 @@ RADIOS = {
 
 async def play_radio(interaction, name: str):
 
+    await interaction.response.defer()  # ⭐ MUSS GANZ OBEN STEHEN
+
     if not interaction.user.voice:
-        await interaction.response.send_message("❌ Du bist in keinem Voice Channel!", ephemeral=True)
-        return
+        return await interaction.followup.send("❌ Du bist in keinem Voice Channel!")
 
     url = RADIOS.get(name)
 
     if not url:
-        await interaction.response.send_message("❌ Sender nicht gefunden!", ephemeral=True)
-        return
+        return await interaction.followup.send("❌ Sender nicht gefunden!")
 
     channel = interaction.user.voice.channel
     vc = interaction.guild.voice_client
@@ -39,10 +39,11 @@ async def play_radio(interaction, name: str):
 
     vc.play(source)
 
-    await interaction.response.send_message(f"📻 Jetzt läuft **{name.upper()}**")
+    await interaction.followup.send(f"📻 Jetzt läuft **{name.upper()}**")
 
 
 async def stop_radio(interaction):
+
     vc = interaction.guild.voice_client
 
     if vc:
