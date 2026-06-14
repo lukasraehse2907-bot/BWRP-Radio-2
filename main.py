@@ -1,3 +1,5 @@
+import nacl
+print("✅ PyNaCl wurde geladen")
 import os
 import discord
 from discord.ext import commands
