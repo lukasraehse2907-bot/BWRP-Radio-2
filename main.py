@@ -1,5 +1,3 @@
-import nacl
-print("✅ PyNaCl wurde geladen")
 import os
 import discord
 from discord.ext import commands
@@ -12,6 +10,8 @@ load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
+intents.voice_states = True
+
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
@@ -31,7 +31,7 @@ async def house(interaction: discord.Interaction):
     await play_radio(interaction, "house")
 
 
-@bot.tree.command(name="charts", description="N-JOY")
+@bot.tree.command(name="charts", description="N-JOY Charts")
 async def charts(interaction: discord.Interaction):
     await play_radio(interaction, "charts")
 
@@ -41,7 +41,7 @@ async def rock(interaction: discord.Interaction):
     await play_radio(interaction, "rock")
 
 
-@bot.tree.command(name="stop", description="Radio stoppen")
+@bot.tree.command(name="stop", description="Stoppt das Radio")
 async def stop(interaction: discord.Interaction):
     await stop_radio(interaction)
 
