@@ -1,62 +1,60 @@
 import discord
-from discord.ext import commands
-from discord import app_commands
 
-STREAM_URL = "https://s3.eu-central-3.ionoscloud.com/media-files-2026/SpotiDown.App%20-%20BIERBRUNNEN%20-%20TIEFBASSKOMMANDO.mp3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=EEAAAAEFUDiECSVDZolniioKpyoZH3dFQaSIXPS7_4uB-lxzygCo2BYCTjhjAAAAAAJOOGNFFSZ8FcopUrkMF7QDqDYy%2F20260614%2Feu-central-3%2Fs3%2Faws4_request&X-Amz-Date=20260614T000725Z&X-Amz-Expires=1800&X-Amz-Signature=059b4f94034a38963327f082a1306004165fc93c3eccdd7b06ef15847ec12310&X-Amz-SignedHeaders=host&x-id=GetObject"
+RADIOS = {
+    "techno": "https://stream.sunshine-live.de/techno/mp3-192/",
+    "house": "https://listen.housetime.fm/tunein-mp3",
+    "charts": "https://icecast.ndr.de/ndr/njoy/live/mp3/128/stream.mp3",
+    "rock": "https://streams.radiobob.de/bob-national/mp3-192/streams.radiobob.de/"
+}
 
-class Radio(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+async def play_radio(interaction, sender: str):
+    if interaction.user.voice is None:
+        await interaction.response.send_message(
+            "❌ Du musst in einem Sprachkanal sein!",
+            ephemeral=True
+        )
+        return
 
-    @app_commands.command(
-        name="play",
-        description="Startet das Radio"
+    sender = sender.lower()
+
+    if sender not in RADIOS:
+        await interaction.response.send_message(
+            f"❌ Sender nicht gefunden.\nVerfügbar: {', '.join(RADIOS.keys())}",
+            ephemeral=True
+        )
+        return
+
+    channel = interaction.user.voice.channel
+
+    vc = interaction.guild.voice_client
+
+    if vc is None:
+        vc = await channel.connect()
+    else:
+        await vc.move_to(channel)
+
+    if vc.is_playing():
+        vc.stop()
+
+    source = discord.FFmpegPCMAudio(
+        RADIOS[sender],
+        before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
     )
-    async def play(self, interaction: discord.Interaction):
 
-        try:
-            # Discord sofort antworten lassen
-            await interaction.response.defer()
+    vc.play(source)
 
-            if interaction.user.voice is None:
-                await interaction.followup.send(
-                    "❌ Du musst in einem Voice-Channel sein."
-                )
-                return
+    await interaction.response.send_message(
+        f"📻 Jetzt läuft **{sender.upper()}**"
+    )
 
-            channel = interaction.user.voice.channel
+async def stop_radio(interaction):
+    vc = interaction.guild.voice_client
 
-            if interaction.guild.voice_client is None:
-                vc = await channel.connect()
-            else:
-                vc = interaction.guild.voice_client
-
-            print("FFmpeg wird gestartet")
-
-            source = discord.FFmpegPCMAudio(
-                STREAM_URL,
-                before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-                options="-vn"
-            )
-
-            print("FFmpeg Objekt erstellt")
-
-            vc.stop()
-            vc.play(source)
-
-            print("Audio wird abgespielt")
-
-            await interaction.followup.send(
-                "▶️ Radio gestartet!"
-            )
-
-        except Exception as e:
-            print("FEHLER:", e)
-
-            if interaction.response.is_done():
-                await interaction.followup.send(f"❌ Fehler: {e}")
-            else:
-                await interaction.response.send_message(f"❌ Fehler: {e}")
-
-async def setup(bot):
-    await bot.add_cog(Radio(bot))
+    if vc:
+        await vc.disconnect()
+        await interaction.response.send_message("⏹️ Radio gestoppt.")
+    else:
+        await interaction.response.send_message(
+            "❌ Ich bin in keinem Sprachkanal.",
+            ephemeral=True
+        )

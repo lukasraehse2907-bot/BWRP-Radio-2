@@ -1,19 +1,14 @@
+import os
 import discord
 from discord.ext import commands
-import asyncio
-import os
-import subprocess
-import shutil
+from discord import app_commands
+from dotenv import load_dotenv
 
-# FFmpeg testen
-print("FFMPEG PATH:", shutil.which("ffmpeg"))
+from radio import play_radio, stop_radio
 
-try:
-    print(subprocess.check_output(
-        ["ffmpeg", "-version"]
-    ).decode())
-except Exception as e:
-    print("FFMPEG FEHLT:", e)
+load_dotenv()
+
+TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 
@@ -24,17 +19,24 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
-    print(f"Eingeloggt als {bot.user}")
+    await bot.tree.sync()
+    print(f"{bot.user} ist online!")
 
-    try:
-        synced = await bot.tree.sync()
-        print(f"{len(synced)} Slash Commands synchronisiert")
-    except Exception as e:
-        print("Sync Fehler:", e)
+@bot.tree.command(
+    name="radio",
+    description="Starte einen Radiosender"
+)
+@app_commands.describe(
+    sender="techno, house, charts oder rock"
+)
+async def radio(interaction: discord.Interaction, sender: str):
+    await play_radio(interaction, sender)
 
-async def main():
-    async with bot:
-        await bot.load_extension("cogs.radio")
-        await bot.start(os.getenv("TOKEN"))
+@bot.tree.command(
+    name="stop",
+    description="Stoppt das Radio"
+)
+async def stop(interaction: discord.Interaction):
+    await stop_radio(interaction)
 
-asyncio.run(main())
+bot.run(TOKEN)
