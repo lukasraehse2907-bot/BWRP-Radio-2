@@ -18,32 +18,28 @@ async def play_radio(interaction, name: str):
     url = RADIOS.get(name)
 
     if not url:
-        return await interaction.followup.send("❌ Sender nicht gefunden!")
+        return await interaction.followup.send(f"❌ Ungültiger Sender: {name}")
 
     channel = interaction.user.voice.channel
     vc = interaction.guild.voice_client
 
-    try:
-        if vc is None:
-            vc = await channel.connect(timeout=30, reconnect=True)
-        else:
-            await vc.move_to(channel)
+    if vc is None:
+        vc = await channel.connect()
+    else:
+        await vc.move_to(channel)
 
-        if vc.is_playing():
-            vc.stop()
+    if vc.is_playing():
+        vc.stop()
 
-        source = discord.FFmpegPCMAudio(
-            url,
-            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            options="-vn"
-        )
+    source = discord.FFmpegPCMAudio(
+        url,
+        before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+        options="-vn"
+    )
 
-        vc.play(source)
+    vc.play(source)
 
-        await interaction.followup.send(f"📻 Jetzt läuft **{name.upper()}**")
-
-    except Exception as e:
-        await interaction.followup.send(f"❌ Voice Fehler: {e}")
+    await interaction.followup.send(f"📻 Jetzt läuft **{name}**")
 
 
 async def stop_radio(interaction):
@@ -54,4 +50,4 @@ async def stop_radio(interaction):
         await vc.disconnect()
         await interaction.response.send_message("⏹️ Radio gestoppt")
     else:
-        await interaction.response.send_message("❌ Ich bin in keinem Voice Channel", ephemeral=True)
+        await interaction.response.send_message("❌ Nicht im Voice Channel")
