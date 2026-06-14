@@ -1,24 +1,14 @@
 import discord
 
-RADIOS = {
-    "techno": "https://stream.sunshine-live.de/techno/mp3-192/",
-    "house": "https://listen.housetime.fm/tunein-mp3",
-    "charts": "https://icecast.ndr.de/ndr/njoy/live/mp3/128/stream.mp3",
-    "rock": "https://streams.radiobob.de/bob-national/mp3-192/streams.radiobob.de/"
-}
+RADIO_URL = "https://stream.sunshine-live.de/techno/mp3-192/"
 
 
-async def play_radio(interaction, name: str):
+async def play_radio(interaction):
 
     await interaction.response.defer()
 
     if not interaction.user.voice:
         return await interaction.followup.send("❌ Du bist in keinem Voice Channel!")
-
-    url = RADIOS.get(name)
-
-    if not url:
-        return await interaction.followup.send(f"❌ Ungültiger Sender: {name}")
 
     channel = interaction.user.voice.channel
     vc = interaction.guild.voice_client
@@ -32,14 +22,14 @@ async def play_radio(interaction, name: str):
         vc.stop()
 
     source = discord.FFmpegPCMAudio(
-        url,
+        RADIO_URL,
         before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         options="-vn"
     )
 
     vc.play(source)
 
-    await interaction.followup.send(f"📻 Jetzt läuft **{name}**")
+    await interaction.followup.send("📻 Radio läuft!")
 
 
 async def stop_radio(interaction):
@@ -48,6 +38,6 @@ async def stop_radio(interaction):
 
     if vc:
         await vc.disconnect()
-        await interaction.response.send_message("⏹️ Radio gestoppt")
+        await interaction.response.send_message("⏹️ Gestoppt")
     else:
         await interaction.response.send_message("❌ Nicht im Voice Channel")

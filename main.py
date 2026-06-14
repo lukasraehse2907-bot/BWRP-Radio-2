@@ -21,12 +21,12 @@ async def on_ready():
     print(f"✅ Online als {bot.user}")
 
 
-@bot.tree.command(name="radio", description="Starte ein Radio")
-async def radio(interaction: discord.Interaction, sender: str):
-    await play_radio(interaction, sender)
+@bot.tree.command(name="radio", description="Starte das Radio")
+async def radio(interaction: discord.Interaction):
+    await play_radio(interaction)
 
 
-@bot.tree.command(name="stop", description="Stoppt Radio")
+@bot.tree.command(name="stop", description="Stoppt das Radio")
 async def stop(interaction: discord.Interaction):
     await stop_radio(interaction)
 
