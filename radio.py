@@ -7,25 +7,20 @@ RADIOS = {
     "rock": "https://streams.radiobob.de/bob-national/mp3-192/streams.radiobob.de/"
 }
 
-async def play_radio(interaction, sender: str):
-    if interaction.user.voice is None:
-        await interaction.response.send_message(
-            "❌ Du musst in einem Sprachkanal sein!",
-            ephemeral=True
-        )
+
+async def play_radio(interaction, name: str):
+
+    if not interaction.user.voice:
+        await interaction.response.send_message("❌ Du bist in keinem Voice Channel!", ephemeral=True)
         return
 
-    sender = sender.lower()
+    url = RADIOS.get(name)
 
-    if sender not in RADIOS:
-        await interaction.response.send_message(
-            f"❌ Sender nicht gefunden.\nVerfügbar: {', '.join(RADIOS.keys())}",
-            ephemeral=True
-        )
+    if not url:
+        await interaction.response.send_message("❌ Sender nicht gefunden!", ephemeral=True)
         return
 
     channel = interaction.user.voice.channel
-
     vc = interaction.guild.voice_client
 
     if vc is None:
@@ -37,24 +32,21 @@ async def play_radio(interaction, sender: str):
         vc.stop()
 
     source = discord.FFmpegPCMAudio(
-        RADIOS[sender],
-        before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
+        url,
+        before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+        options="-vn"
     )
 
     vc.play(source)
 
-    await interaction.response.send_message(
-        f"📻 Jetzt läuft **{sender.upper()}**"
-    )
+    await interaction.response.send_message(f"📻 Jetzt läuft **{name.upper()}**")
+
 
 async def stop_radio(interaction):
     vc = interaction.guild.voice_client
 
     if vc:
         await vc.disconnect()
-        await interaction.response.send_message("⏹️ Radio gestoppt.")
+        await interaction.response.send_message("⏹️ Radio gestoppt")
     else:
-        await interaction.response.send_message(
-            "❌ Ich bin in keinem Sprachkanal.",
-            ephemeral=True
-        )
+        await interaction.response.send_message("❌ Nicht im Voice Channel", ephemeral=True)
