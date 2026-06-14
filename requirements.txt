@@ -1,3 +1,4 @@
+Installing collected packages:
+PyNaCl
 discord.py
 python-dotenv
-PyNaCl
