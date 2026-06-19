@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-STREAM_URL = "https://statutes-mumbai-gradually-wolf.trycloudflare.com/bwrp"
+STREAM_URL = "https://copyrights-recorder-cement-totals.trycloudflare.com/bwrp"
 
 class Radio(commands.Cog):
     def __init__(self, bot):
