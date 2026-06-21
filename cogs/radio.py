@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-STREAM_URL = "http://127.0.0.1:8000/live"
+STREAM_URL = "https://penguin-acoustic-crown-measure.trycloudflare.com/live"
 
 class Radio(commands.Cog):
     def __init__(self, bot):
